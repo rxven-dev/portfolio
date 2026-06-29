@@ -178,7 +178,7 @@
         }
         window.addEventListener('DOMContentLoaded', generateNewCaptcha);
 
-        // --- SYNCHRONIZED DASHBOARD TERMINAL LOGIN HANDLER ---
+        // --- LOGIN PROCESSOR ---
         loginForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             
@@ -199,7 +199,6 @@
             authAlert.innerText = "Connecting to global node database... Checking authorization.";
             authAlert.style.display = "block";
 
-            // Hardcoded Master Admin bypass checks
             if ((email === "admin@gamevantage.com" && password === "admin123") || 
                 (email === "dev.crxvengs@gmail.com" && password === "admin123")) {
                 
@@ -214,7 +213,10 @@
             }
 
             try {
-                // Halts process here until the database payload finishes downloading completely to prevent rapid red-green banner flashing
+                if (typeof fetchCloudUsers !== "function") {
+                    throw new Error("Database helper file is missing or not loading properly.");
+                }
+
                 let systemUsers = await fetchCloudUsers();
                 const matchedUser = systemUsers.find(user => user.email === email && user.password === password);
 
@@ -239,7 +241,7 @@
             }
         });
 
-        // --- REGISTER HANDLER ---
+        // --- SIGN UP PROCESSOR (FIXED TRY/CATCH WRAPPER) ---
         signUpForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             const name = document.getElementById("signUpName").value.trim();
@@ -251,6 +253,10 @@
             authAlert.style.display = "block";
 
             try {
+                if (typeof fetchCloudUsers !== "function") {
+                    throw new Error("Database helper file is missing or not loading properly.");
+                }
+
                 let systemUsers = await fetchCloudUsers();
 
                 if (email === "admin@gamevantage.com" || email === "dev.crxvengs@gmail.com" || systemUsers.some(u => u.email === email)) {
@@ -285,15 +291,16 @@
                         authAlert.innerText = "Mail Dispatch Failed. Check system API configs.";
                         authAlert.style.display = "block";
                     });
+
             } catch (err) {
-                console.error(err);
+                console.error("Signup validation crash:", err);
                 authAlert.className = "alert-msg alert-danger";
-                authAlert.innerText = "Database connection error. Unable to perform index check.";
+                authAlert.innerText = "Database connection offline. Resetting local file pipeline.";
                 authAlert.style.display = "block";
             }
         });
 
-        // --- VERIFICATION DIALOG SUBMIT TRIGGERS ---
+        // --- PIN VERIFICATION PROCESSOR ---
         document.getElementById("btnVerifyCode").addEventListener("click", async () => {
             const enteredCode = document.getElementById("emailCodeInput").value.trim();
 
@@ -303,16 +310,22 @@
                 authAlert.style.display = "block";
                 verificationModal.style.display = "none";
 
-                // Securely appends the brand new registration data object structure to your JSON Storage matrix file
-                const success = await registerNewCloudUser(temporaryRegistrationCache);
-                
-                if (success) {
-                    localStorage.setItem('activeSessionUser', JSON.stringify(temporaryRegistrationCache));
-                    authAlert.innerText = "Profile Authorized! Booting interface parameters...";
-                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
-                } else {
+                try {
+                    const success = await registerNewCloudUser(temporaryRegistrationCache);
+                    
+                    if (success) {
+                        localStorage.setItem('activeSessionUser', JSON.stringify(temporaryRegistrationCache));
+                        authAlert.innerText = "Profile Authorized! Booting interface parameters...";
+                        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                    } else {
+                        authAlert.className = "alert-msg alert-danger";
+                        authAlert.innerText = "Database error syncing record. Please check your network connection.";
+                        authAlert.style.display = "block";
+                    }
+                } catch (dbErr) {
+                    console.error("Write error:", dbErr);
                     authAlert.className = "alert-msg alert-danger";
-                    authAlert.innerText = "Database error syncing record. Please check your network connection.";
+                    authAlert.innerText = "Critical database save failure.";
                     authAlert.style.display = "block";
                 }
             } else {
