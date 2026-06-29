@@ -25,7 +25,6 @@
         body { background-color: var(--bg-main); color: var(--text-primary); display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; padding: 16px; }
         .auth-container { background: var(--bg-card); border: 1px solid var(--border-color); width: 100%; max-width: 440px; border-radius: 12px; padding: 36px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         
-        /* Mobile friendly adjustments */
         @media (max-width: 480px) {
             .auth-container { padding: 24px 16px; }
             .captcha-row { grid-template-columns: 110px 1fr; }
@@ -53,7 +52,6 @@
         .alert-danger { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
         .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); }
         
-        /* Verification Modal Box Overlay */
         .modal-verify { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
         .modal-verify-content { background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; }
         .verify-input { background: #111827; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: white; font-size: 1.5rem; letter-spacing: 8px; text-align: center; width: 160px; outline: none; margin: 20px 0; -webkit-appearance: none; appearance: none; }
@@ -143,6 +141,10 @@
     <script>
         emailjs.init("owB2XT75OBCwbGap4");
 
+        // --- GLOBAL CENTRAL DATABASE SETUP ---
+        // Change "gamerack_prod_unique_bucket" to any unique name you want for your app's database storage
+        const CLOUD_DB_URL = "https://kvdb.io/MN86yFwZ3q2g6YpL9qWvj7/gamerack_users_list";
+
         let correctCaptchaCode = "";
         let expectedVerificationPin = "";
         let temporaryRegistrationCache = null;
@@ -152,6 +154,34 @@
         const signUpForm = document.getElementById("signUpForm");
         const gatewaySubtitle = document.getElementById("gatewaySubtitle");
         const verificationModal = document.getElementById("verificationModal");
+
+        // Helper function to fetch user registry array from the central cloud database
+        async function fetchCloudUsers() {
+            try {
+                const response = await fetch(CLOUD_DB_URL);
+                if (!response.ok) return [];
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
+            } catch (err) {
+                console.error("Cloud Database Read Error:", err);
+                return [];
+            }
+        }
+
+        // Helper function to update the central user array list on the cloud database
+        async function saveCloudUsers(usersArray) {
+            try {
+                await fetch(CLOUD_DB_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(usersArray),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                return true;
+            } catch (err) {
+                console.error("Cloud Database Write Error:", err);
+                return false;
+            }
+        }
 
         document.getElementById("linkToSignUp").addEventListener("click", () => {
             authAlert.style.display = "none";
@@ -178,7 +208,7 @@
         }
         window.addEventListener('DOMContentLoaded', generateNewCaptcha);
 
-        loginForm.addEventListener("submit", function(e) {
+        loginForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             
             const email = document.getElementById("loginEmail").value.trim().toLowerCase();
@@ -194,36 +224,31 @@
                 return;
             }
 
+            // Show checking status loading message
+            authAlert.className = "alert-msg alert-success";
+            authAlert.innerText = "Connecting to global node database... Checking authorization.";
+            authAlert.style.display = "block";
+
             if ((email === "admin@gamevantage.com" && password === "admin123") || 
                 (email === "dev.crxvengs@gmail.com" && password === "admin123")) {
                 
                 const masterName = email === "admin@gamevantage.com" ? "Adrian Cllnro" : "New Publisher";
                 const rootSession = { name: masterName, email: email, avatar: null };
                 
-                try {
-                    localStorage.setItem('activeSessionUser', JSON.stringify(rootSession));
-                } catch(err) {
-                    console.warn("LocalStorage error (likely mobile private mode):", err);
-                }
+                localStorage.setItem('activeSessionUser', JSON.stringify(rootSession));
                 
-                authAlert.className = "alert-msg alert-success";
                 authAlert.innerText = "Terminal Authorized. Accessing environment framework...";
-                authAlert.style.display = "block";
                 setTimeout(() => { window.location.href = 'index.html'; }, 1200);
                 return;
             }
 
-            let systemUsers = [];
-            try {
-                systemUsers = JSON.parse(localStorage.getItem('systemUsers')) || [];
-            } catch(err) {}
-
+            // Fetch users cleanly from cloud system database
+            let systemUsers = await fetchCloudUsers();
             const matchedUser = systemUsers.find(user => user.email === email && user.password === password);
 
             if (matchedUser) {
-                try {
-                    localStorage.setItem('activeSessionUser', JSON.stringify(matchedUser));
-                } catch(err) {}
+                // Keep activeSessionUser local only to keep track of who is active on this browser!
+                localStorage.setItem('activeSessionUser', JSON.stringify(matchedUser));
                 authAlert.className = "alert-msg alert-success";
                 authAlert.innerText = "Terminal Authorized. Accessing environment framework...";
                 authAlert.style.display = "block";
@@ -236,14 +261,17 @@
             }
         });
 
-        signUpForm.addEventListener("submit", function(e) {
+        signUpForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             const name = document.getElementById("signUpName").value.trim();
             const email = document.getElementById("signUpEmail").value.trim().toLowerCase();
             const password = document.getElementById("signUpPassword").value;
 
-            let systemUsers = [];
-            try { systemUsers = JSON.parse(localStorage.getItem('systemUsers')) || []; } catch(err) {}
+            authAlert.className = "alert-msg alert-success";
+            authAlert.innerText = "Validating database indices... Please hold.";
+            authAlert.style.display = "block";
+
+            let systemUsers = await fetchCloudUsers();
 
             if (email === "admin@gamevantage.com" || email === "dev.crxvengs@gmail.com" || systemUsers.some(u => u.email === email)) {
                 authAlert.className = "alert-msg alert-danger";
@@ -279,26 +307,30 @@
                 });
         });
 
-        document.getElementById("btnVerifyCode").addEventListener("click", () => {
+        document.getElementById("btnVerifyCode").addEventListener("click", async () => {
             const enteredCode = document.getElementById("emailCodeInput").value.trim();
 
             if (enteredCode === expectedVerificationPin) {
-                let systemUsers = [];
-                try { systemUsers = JSON.parse(localStorage.getItem('systemUsers')) || []; } catch(err) {}
-                
+                authAlert.className = "alert-msg alert-success";
+                authAlert.innerText = "Pin verified. Writing parameters into central cloud logs...";
+                authAlert.style.display = "block";
+                verificationModal.style.display = "none";
+
+                // Read live user array list first
+                let systemUsers = await fetchCloudUsers();
                 systemUsers.push(temporaryRegistrationCache);
                 
-                try {
-                    localStorage.setItem('systemUsers', JSON.stringify(systemUsers));
+                // Securely save back up to our cloud file
+                const success = await saveCloudUsers(systemUsers);
+                
+                if (success) {
                     localStorage.setItem('activeSessionUser', JSON.stringify(temporaryRegistrationCache));
-                } catch(err) {}
-
-                verificationModal.style.display = "none";
-                authAlert.className = "alert-msg alert-success";
-                authAlert.innerText = "Profile Authorized! Booting interface parameters...";
-                authAlert.style.display = "block";
-
-                setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                    authAlert.innerText = "Profile Authorized! Booting interface parameters...";
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                } else {
+                    authAlert.className = "alert-msg alert-danger";
+                    authAlert.innerText = "Database error syncing record. Please check your network connection.";
+                }
             } else {
                 alert("Security Code Mismatch. Please check your verification digits and retry.");
             }
