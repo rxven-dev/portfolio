@@ -36,3 +36,21 @@ async function saveCloudUsers(usersArray) {
         return false;
     }
 }
+
+/**
+ * Directly appends a single new user account node to the cloud tracking logs.
+ * @param {Object} newUser An object containing { name, email, password, avatar }
+ * @returns {Promise<boolean>} True if user successfully saved to the cloud matrix
+ */
+async function registerNewCloudUser(newUser) {
+    // 1. Fetch current up-to-date registry lists over the wire
+    let currentUsersList = await fetchCloudUsers();
+    
+    // 2. Prevent duplicate entries if they somehow submit twice
+    if (!currentUsersList.some(user => user.email === newUser.email)) {
+        currentUsersList.push(newUser);
+    }
+    
+    // 3. Post back the expanded list to kvdb.io mapping array records
+    return await saveCloudUsers(currentUsersList);
+}

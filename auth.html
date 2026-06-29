@@ -139,8 +139,6 @@
     </div>
 
     <script src="assets/js/user-db.js"></script>
-    
-    <script src="assets/js/user-db.js"></script>
 
     <script>
         emailjs.init("owB2XT75OBCwbGap4");
@@ -180,7 +178,6 @@
         }
         window.addEventListener('DOMContentLoaded', generateNewCaptcha);
 
-        // --- FIXED SYNCHRONIZED LOGIN HANDLER ---
         loginForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             
@@ -197,12 +194,10 @@
                 return;
             }
 
-            // 1. Show the loading state
             authAlert.className = "alert-msg alert-success";
             authAlert.innerText = "Connecting to global node database... Checking authorization.";
             authAlert.style.display = "block";
 
-            // 2. Hardcoded Admin bypass check
             if ((email === "admin@gamevantage.com" && password === "admin123") || 
                 (email === "dev.crxvengs@gmail.com" && password === "admin123")) {
                 
@@ -217,10 +212,7 @@
             }
 
             try {
-                // 3. CRITICAL FIX: We halt right here until the database array completely downloads
                 let systemUsers = await fetchCloudUsers();
-                
-                // 4. Run the matching validation only AFTER data arrives safely
                 const matchedUser = systemUsers.find(user => user.email === email && user.password === password);
 
                 if (matchedUser) {
@@ -230,7 +222,6 @@
                     authAlert.style.display = "block";
                     setTimeout(() => { window.location.href = 'index.html'; }, 1200);
                 } else {
-                    // No match found in the cloud logs container database
                     authAlert.className = "alert-msg alert-danger";
                     authAlert.innerText = "Access Denied: Invalid configuration credential matrix pairing.";
                     authAlert.style.display = "block";
@@ -291,6 +282,7 @@
                 });
         });
 
+        // --- VERIFICATION CONFIRMATION TRIGGERS ---
         document.getElementById("btnVerifyCode").addEventListener("click", async () => {
             const enteredCode = document.getElementById("emailCodeInput").value.trim();
 
@@ -300,10 +292,8 @@
                 authAlert.style.display = "block";
                 verificationModal.style.display = "none";
 
-                let systemUsers = await fetchCloudUsers();
-                systemUsers.push(temporaryRegistrationCache);
-                
-                const success = await saveCloudUsers(systemUsers);
+                // Uses your separated file function to append the user payload securely to the cloud matrix
+                const success = await registerNewCloudUser(temporaryRegistrationCache);
                 
                 if (success) {
                     localStorage.setItem('activeSessionUser', JSON.stringify(temporaryRegistrationCache));
