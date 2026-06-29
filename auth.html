@@ -39,12 +39,12 @@
         .form-group label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
         .input-wrapper { position: relative; }
         .input-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 1.1rem; }
-        .input-wrapper input { width: 100%; background: #111827; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 12px 12px 40px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+        .input-wrapper input { width: 100%; background: #111827; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 12px 12px 40px; color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
         .input-wrapper input:focus { border-color: var(--accent-primary); }
         .captcha-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; background: #111827; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; margin-bottom: 20px; }
         .captcha-box { font-weight: 700; font-size: 1.25rem; letter-spacing: 4px; color: var(--accent-primary); background: #1f2937; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px dashed var(--border-color); user-select: none; position: relative; }
-        .captcha-input { width: 100%; background: transparent; border: none; padding: 6px 12px; color: var(--text-primary); font-size: 1rem; outline: none; text-align: center; border-bottom: 2px solid var(--border-color); -webkit-appearance: none; }
-        .btn-submit { width: 100%; background: var(--accent-primary); color: white; border: none; border-radius: 8px; padding: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-appearance: none; }
+        .captcha-input { width: 100%; background: transparent; border: none; padding: 6px 12px; color: var(--text-primary); font-size: 1rem; outline: none; text-align: center; border-bottom: 2px solid var(--border-color); -webkit-appearance: none; appearance: none; }
+        .btn-submit { width: 100%; background: var(--accent-primary); color: white; border: none; border-radius: 8px; padding: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-appearance: none; appearance: none; }
         .btn-submit:hover { background: var(--accent-hover); }
         .toggle-view-text { text-align: center; margin-top: 20px; font-size: 0.875rem; color: var(--text-secondary); }
         .toggle-view-text a { color: var(--accent-primary); text-decoration: none; font-weight: 600; cursor: pointer; }
@@ -56,7 +56,7 @@
         /* Verification Modal Box Overlay */
         .modal-verify { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; display: none; }
         .modal-verify-content { background: var(--bg-card); border: 1px solid var(--border-color); padding: 32px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; }
-        .verify-input { background: #111827; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: white; font-size: 1.5rem; letter-spacing: 8px; text-align: center; width: 160px; outline: none; margin: 20px 0; -webkit-appearance: none; }
+        .verify-input { background: #111827; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: white; font-size: 1.5rem; letter-spacing: 8px; text-align: center; width: 160px; outline: none; margin: 20px 0; -webkit-appearance: none; appearance: none; }
         .verify-input:focus { border-color: var(--accent-primary); }
     </style>
 </head>
@@ -181,7 +181,6 @@
         loginForm.addEventListener("submit", function(e) {
             e.preventDefault();
             
-            // Smart mobile inputs cleaning: trim off spaces and auto-capitalize values
             const email = document.getElementById("loginEmail").value.trim().toLowerCase();
             const password = document.getElementById("loginPassword").value;
             const captchaVal = document.getElementById("captchaUserInput").value.replace(/\s+/g, '').toUpperCase();
@@ -217,7 +216,7 @@
             let systemUsers = [];
             try {
                 systemUsers = JSON.parse(localStorage.getItem('systemUsers')) || [];
-            } catch(err) { console.error(err); }
+            } catch(err) {}
 
             const matchedUser = systemUsers.find(user => user.email === email && user.password === password);
 
