@@ -446,3 +446,65 @@ footer {
 @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modalScaleUp { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* --- MOBILE LAYOUT PERSISTENCE MATRIX --- */
+        @media (max-width: 768px) {
+            html, body {
+                font-size: 11px !important; /* Baseline system scale compression */
+            }
+            .dashboard-wrapper {
+                display: flex !important;
+                flex-direction: row !important; /* Locks desktop sidebar side-by-side view */
+                align-items: stretch !important;
+                width: 100% !important;
+                overflow-x: hidden !important;
+            }
+            .sidebar {
+                width: 125px !important; /* Compact design footprint */
+                min-width: 125px !important;
+                height: 100vh !important;
+                position: sticky !important;
+                top: 0 !important;
+                padding: 12px 6px !important;
+            }
+            .sidebar-brand {
+                font-size: 0.9rem !important;
+                margin-bottom: 16px !important;
+                gap: 4px !important;
+            }
+            .menu-item {
+                padding: 8px 6px !important;
+                font-size: 0.7rem !important;
+                gap: 6px !important;
+            }
+            .sidebar-footer .user-avatar {
+                width: 26px !important;
+                height: 26px !important;
+            }
+            .main-content {
+                flex: 1 !important;
+                width: calc(100% - 125px) !important;
+                margin-left: 0 !important;
+                padding: 12px !important;
+                overflow-x: hidden !important;
+            }
+            
+            /* --- THE FIX: Maintain Desktop Side-by-Side Cards on Mobile --- */
+            .content-container div[style*="display: grid"], 
+            .content-container div[style*="grid-template-columns"] {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important; /* Force 2 columns side-by-side instead of stacking */
+                gap: 12px !important;
+            }
+
+            /* Adjust single forms or inner inputs so they don't break boundaries */
+            .metric-card {
+                padding: 14px !important;
+                border-radius: 10px !important;
+            }
+            .custom-theme-input {
+                padding: 6px 10px !important;
+                font-size: 0.85rem !important;
+                height: 36px !important;
+            }
+        }
