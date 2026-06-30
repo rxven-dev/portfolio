@@ -1,10 +1,12 @@
 // Initialization configuration for your specific cloud database stream
 const SUPABASE_URL = "https://xipmorhyzcxgddkijavz.supabase.co";
-// TODO: Paste your actual copied anon public key string between these quotes!
-const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE"; 
+const SUPABASE_ANON_KEY = "https://xipmorhyzcxgddkijavz.supabase.co/rest/v1/profiles"; // Put your copied key here
 
-// Create the network client link connection safely
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// Create the network client connection safely using the global library context
+let supabase = null;
+if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
 
 // Helper function to extract user identifier safely from active engine sessions
 function getCurrentUserEmail() {

@@ -889,69 +889,73 @@
             }
 
 if (saveProfileSettingsBtn) {
-                saveProfileSettingsBtn.addEventListener('click', async (e) => { // Added 'async' here
-                    e.preventDefault();
-                    
-                    const rawUsername = settingsUsernameInput ? settingsUsernameInput.value.trim() : "";
-                    const currentTime = Date.now();
-                    if (usernameCooldownMessage) usernameCooldownMessage.style.display = "none";
+    saveProfileSettingsBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const rawUsername = settingsUsernameInput ? settingsUsernameInput.value.trim() : "";
+        const currentTime = Date.now();
+        if (usernameCooldownMessage) usernameCooldownMessage.style.display = "none";
 
-                    if (!rawUsername) {
-                        alert("Validation Error: Username string cannot be left blank.");
-                        return;
+        if (!rawUsername) {
+            alert("Validation Error: Username string cannot be left blank.");
+            return;
+        }
+
+        const newUsernameWithIcon = rawUsername.includes('ri-git-fork-fill') ? rawUsername : `<i class="ri-git-fork-fill"></i> ${rawUsername}`;
+
+        if (newUsernameWithIcon !== activeUser.name) {
+            if (activeUser.lastUsernameChange) {
+                const timePassed = currentTime - activeUser.lastUsernameChange;
+                if (timePassed < SIX_DAYS_MS) {
+                    const timeLeft = SIX_DAYS_MS - timePassed;
+                    const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minsLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    if (usernameCooldownMessage) {
+                        usernameCooldownMessage.innerHTML = `⏳ <strong>Username Locked!</strong><br>You can only modify your username once every 6 days. Please wait ${daysLeft}d ${hoursLeft}h ${minsLeft}m before trying again.`;
+                        usernameCooldownMessage.style.display = "block";
                     }
-
-                    const newUsernameWithIcon = rawUsername.includes('ri-git-fork-fill') ? rawUsername : `<i class="ri-git-fork-fill"></i> ${rawUsername}`;
-
-                    if (newUsernameWithIcon !== activeUser.name) {
-                        if (activeUser.lastUsernameChange) {
-                            const timePassed = currentTime - activeUser.lastUsernameChange;
-                            if (timePassed < SIX_DAYS_MS) {
-                                const timeLeft = SIX_DAYS_MS - timePassed;
-                                const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                                const hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                const minsLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                                if (usernameCooldownMessage) {
-                                    usernameCooldownMessage.innerHTML = `⏳ <strong>Username Locked!</strong><br>You can only modify your username once every 6 days. Please wait ${daysLeft}d ${hoursLeft}h ${minsLeft}m before trying again.`;
-                                    usernameCooldownMessage.style.display = "block";
-                                }
-                                return;
-                            }
-                        }
-                        activeUser.name = newUsernameWithIcon;
-                        activeUser.lastUsernameChange = currentTime;
-                    }
-
-                    savePreference('active_status', statusToggle ? statusToggle.checked : true);
-                    savePreference('dark_mode', themeToggle ? themeToggle.checked : true);
-                    savePreference('email_logs', emailToggle ? emailToggle.checked : false);
-
-                    activeUser.avatar = temporaryAvatarBase64;
-                    localStorage.setItem('activeSessionUser', JSON.stringify(activeUser));
-                    
-                    // --- CLOUD SYNCHRONIZATION UPGRADE ---
-                    const userEmail = activeUser.email || "guest_user";
-                    if (typeof supabase !== 'undefined') {
-                        // Push username changes and updated cropped base64 avatar strings up to Supabase row matching user identity
-                        const { error } = await supabase
-                            .from('profiles')
-                            .upsert({ 
-                                id: userEmail, 
-                                username: rawUsername, 
-                                avatar_url: temporaryAvatarBase64 
-                            }, { onConflict: 'id' });
-
-                        if (error) console.error("Cloud profile sync failed:", error.message);
-                    }
-
-                    if (sidebarUsernameText) sidebarUsernameText.innerHTML = activeUser.name;
-                    if (sidebarUserAvatarImg) sidebarUserAvatarImg.src = activeUser.avatar;
-                    if (profileHeaderNameDisplay) profileHeaderNameDisplay.innerHTML = activeUser.name;
-
-                    alert("Configuration changes synchronized successfully across devices!");
-                    window.location.reload();
-                });
+                    return;
+                }
             }
+            activeUser.name = newUsernameWithIcon;
+            activeUser.lastUsernameChange = currentTime;
+        }
+
+        savePreference('active_status', statusToggle ? statusToggle.checked : true);
+        savePreference('dark_mode', themeToggle ? themeToggle.checked : true);
+        savePreference('email_logs', emailToggle ? emailToggle.checked : false);
+
+        activeUser.avatar = temporaryAvatarBase64;
+        localStorage.setItem('activeSessionUser', JSON.stringify(activeUser));
+        
+        // --- SAFE CLOUD SYNCHRONIZATION UPGRADE ---
+        const userEmail = activeUser.email || "guest_user";
+        try {
+            // Using window.supabase instead of direct evaluation prevents fatal ReferenceErrors
+            if (window.supabase) {
+                const { error } = await window.supabase
+                    .from('profiles')
+                    .upsert({ 
+                        id: userEmail, 
+                        username: rawUsername, 
+                        avatar_url: temporaryAvatarBase64 
+                    }, { onConflict: 'id' });
+
+                if (error) console.error("Cloud profile sync failed:", error.message);
+            }
+        } catch (err) {
+            console.warn("Supabase check skipped or failed safely:", err);
+        }
+
+        if (sidebarUsernameText) sidebarUsernameText.innerHTML = activeUser.name;
+        if (sidebarUserAvatarImg) sidebarUserAvatarImg.src = activeUser.avatar;
+        if (profileHeaderNameDisplay) profileHeaderNameDisplay.innerHTML = activeUser.name;
+
+        alert("Configuration changes synchronized successfully across devices!");
+        window.location.reload();
+    });
+}
         });
     </script>
 </body>
