@@ -447,9 +447,9 @@ footer {
 @keyframes modalScaleUp { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-/* --- FIXED MOBILE NAVIGATION SYSTEM --- */
+/* --- FIXED MOBILE LAYOUT & OVERLAY NAVIGATION SYSTEM --- */
 @media (max-width: 768px) {
-    /* 1. Prevent parent layout overflow conflicts */
+    /* Prevent viewport shifting and clipping issues */
     html, body {
         height: 100% !important;
         margin: 0 !important;
@@ -457,65 +457,87 @@ footer {
         overflow: hidden !important;
     }
 
-    /* 2. Isolate layout viewport wrapper box context */
     .dashboard-wrapper {
         display: flex !important;
         flex-direction: row !important;
+        align-items: stretch !important;
         width: 100% !important;
         height: 100vh !important;
         position: relative !important;
         overflow: hidden !important;
     }
 
-    /* 3. THE FIXED OVERLAY DRAWER: Completely hidden to the left by default */
+    /* --- BUG FIX 1: SIDEBAR WIDER FOOTPRINT & OPAQUE BACKGROUND --- */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
-        left: -260px !important; /* Completely pulled off-screen */
-        width: 240px !important;  /* Wider footprint to display text cleanly on phone screens */
-        min-width: 240px !important;
+        left: -270px !important; /* Keeps the wider bar fully hidden off-screen */
+        width: 250px !important;  /* Increased width so layout links fit perfectly */
+        min-width: 250px !important;
         height: 100vh !important;
-        z-index: 999999 !important; /* Forces layout context on top of everything */
-        background-color: #11111b !important; /* Matches base theme palette token values */
+        z-index: 999999 !important; /* Forces layout context on top of everything else */
+        background-color: #11111b !important; /* Deep solid color blocks content bleeding */
         transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 8px 0 25px rgba(0, 0, 0, 0.6) !important;
         display: flex !important;
         flex-direction: column !important;
+        padding: 16px 12px !important;
+        box-sizing: border-box !important;
     }
 
-    /* Slid perfectly onto screen plane when interactive JS flag binds */
+    /* Slid smoothly onto screen when active class attaches */
     .sidebar.mobile-open {
         left: 0 !important;
     }
 
-    /* 4. MAIN BODY CONTAINER INDEPENDENT FLOW RESET */
+    /* Ensure link wrappers expand nicely within the new width */
+    .sidebar .menu-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding: 12px 14px !important;
+        font-size: 0.95rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* --- BUG FIX 2: COMPACT REGISTER NEW GAME BUTTON --- */
+    #openRegisterGameModalBtn {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 6px 10px !important;
+        font-size: 0.75rem !important;
+        height: 34px !important;
+        white-space: nowrap !important; /* Strict protection against text line-wrapping */
+    }
+
+    /* MAIN CONTENT SCROLL ZONE */
     .main-content {
         flex: 1 !important;
         width: 100% !important;
-        max-width: 100% !important;
         height: 100vh !important;
-        margin-left: 0 !important; /* Wipes out desktop layout displacement properties */
+        margin-left: 0 !important;
+        overflow-y: auto !important; 
         padding: 16px !important;
-        overflow-y: auto !important; /* Keeps scroll tracking strictly isolated inside content wrapper */
         box-sizing: border-box !important;
         -webkit-overflow-scrolling: touch !important;
     }
 
-    /* 5. Reveal the 3-line interactive menu trigger button */
+    /* Interactive menu activation button */
     .mobile-menu-btn {
-        display: inline-flex !important;
-        align-items: center;
-        justify-content: center;
+        display: flex !important;
         background: none !important;
         border: none !important;
         color: var(--text-primary, #ffffff) !important;
-        font-size: 1.6rem !important;
+        font-size: 1.5rem !important;
         cursor: pointer !important;
-        padding: 6px !important;
+        padding: 4px !important;
         margin-right: 12px !important;
+        align-items: center !important;
     }
 
-    /* Keep side-by-side card items responsive grid matrix fluid */
+    /* Clean dual grid columns */
     .content-container div[style*="display: grid"], 
     .content-container div[style*="grid-template-columns"] {
         display: grid !important;
@@ -523,7 +545,7 @@ footer {
         gap: 12px !important;
     }
 
-    /* Input focus visual stretch text scale override (No-Zoom Safeguard) */
+    /* Input text field safaris/mobile zoom safeguards */
     .custom-theme-input, 
     .search-bar input,
     select {
