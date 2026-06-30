@@ -449,7 +449,56 @@ footer {
 
 /* --- MOBILE LAYOUT PERSISTENCE MATRIX --- */
 @media (max-width: 768px) {
-    /* Reveal the 3-line hamburger menu icon button on mobile devices */
+    /* Keep core viewport calculations static */
+    html, body {
+        height: 100% !important;
+        margin: 0;
+        padding: 0;
+        overflow: hidden !important;
+    }
+
+    /* Keep layout container processing elements horizontal */
+    .dashboard-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        height: 100vh !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    /* --- THE CORRECT SLIDING OVERLAY SYSTEM --- */
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: -140px !important; /* Kept completely out of sight by default */
+        width: 130px !important;
+        min-width: 130px !important;
+        height: 100vh !important;
+        z-index: 99999 !important; /* Stack cleanly on top of search bar and profiles */
+        background-color: var(--bg-card) !important;
+        transition: left 0.3s ease-in-out !important; /* Smooth gliding movement logic */
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Slid onto the screen when active script class attaches */
+    .sidebar.mobile-open {
+        left: 0 !important;
+    }
+
+    /* --- MAIN CONTENT INDEPENDENT FLOW --- */
+    .main-content {
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100vh !important;
+        margin-left: 0 !important;
+        overflow-y: auto !important; /* Scroll layout engine functions exclusively here */
+        padding: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Reveal the 3-line menu bar button */
     .mobile-menu-btn {
         display: flex !important;
         background: none;
@@ -461,39 +510,21 @@ footer {
         margin-right: 12px;
     }
 
-    /* Transform the layout wrapper back to standard screen layers */
-    .dashboard-wrapper {
-        display: block !important;
-        position: relative !important;
-        height: 100vh !important;
-        overflow: hidden !important;
+    /* Maintain clean double card matrix rows */
+    .content-container div[style*="display: grid"], 
+    .content-container div[style*="grid-template-columns"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
     }
 
-    /* --- THE DRAWER SLIDE SYSTEM --- */
-    .sidebar {
-        position: fixed !important;
-        top: 0 !important;
-        left: -140px !important; /* Completely hides the sidebar off-screen to the left */
-        width: 130px !important;
-        min-width: 130px !important;
-        height: 100vh !important;
-        z-index: 9999 !important; /* Stack cleanly over content cards */
-        background-color: var(--bg-card) !important;
-        transition: left 0.3s ease-in-out !important; /* Smooth sliding transition anim effect */
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
-    }
-
-    /* When this active flag layer class is attached by JS, slide it on-screen */
-    .sidebar.mobile-open {
-        left: 0 !important;
-    }
-
-    /* Force full-width presentation metrics for main screens */
-    .main-content {
-        width: 100% !important;
-        height: 100vh !important;
-        margin-left: 0 !important;
-        overflow-y: auto !important;
-        padding: 16px !important;
+    /* Input text field zoom safeguard override properties */
+    .custom-theme-input, 
+    .search-bar input,
+    select {
+        font-size: 16px !important;
+        transform: scale(0.85) !important;
+        transform-origin: left center !important;
+        width: 117% !important;
     }
 }
