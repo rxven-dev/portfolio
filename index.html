@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css?v=2.5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -62,7 +62,7 @@
         <div class="main-content">
             
             <header class="topbar">
-                <div style="display: flex; align-items: center;">
+                <div class="topbar-left-container">
                     <button id="mobileMenuToggleBtn" class="mobile-menu-btn" type="button">
                         <i class="ri-menu-line"></i>
                     </button>
@@ -73,11 +73,9 @@
                     </div>
                 </div>
                 
-                <div class="topbar-actions" style="display: flex; align-items: center; gap: 16px;">
-                    
+                <div class="topbar-actions">
                     <div class="currency-dropdown-container">
-                        <select id="platformCurrencyConverter" onchange="window.updatePlatformCurrencyExchange(this.value)"
-                                style="background: #11111b; border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        <select id="platformCurrencyConverter" onchange="window.updatePlatformCurrencyExchange(this.value)">
                             <option value="USD">🇺🇸 USD ($)</option>
                             <option value="EUR">🇪🇺 EUR (€)</option>
                             <option value="GBP">🇬🇧 GBP (£)</option>
@@ -85,7 +83,7 @@
                         </select>
                     </div>
 
-                    <button class="action-icon-btn" style="position: relative; background: none; border: none; color: var(--text-secondary); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 8px;">
+                    <button class="action-icon-btn">
                         <i class="ri-notification-3-line"></i>
                         <span class="badge"></span>
                     </button>
@@ -295,7 +293,7 @@
                          <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
                             <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">Active Session Management:</p>
             
-                            <button class="btn" onclick="window.showCustomPopup('Your developer session has been safely closed. Terminating terminal authentication layers...', 'danger', () => { window.location.href='auth.html'; });" style="background-color: var(--danger); color: white; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <button class="btn" id="appSignOutActionBtn" style="background-color: var(--danger); color: white; display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                 <i class="ri-logout-box-r-line"></i> Sign Out
                             </button>
                          </div>
@@ -511,6 +509,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- INLINE DECLARATION SAFEGUARD INITIALIZER FOR SESSION MANAGEMENT ---
+            let activeUser = JSON.parse(localStorage.getItem('activeSessionUser')) || {};
+
             // --- MOBILE NAV DRAWER INTERACTIVE TOGGLE LOGIC ---
             const mobileBtn = document.getElementById('mobileMenuToggleBtn');
             const sidebarEl = document.querySelector('.sidebar');
@@ -531,15 +532,22 @@
                 }
             }
 
-            // --- AUTHENTICATION REDIRECT GATE & SESSION INITIALIZATION ---
-            let activeUser = JSON.parse(localStorage.getItem('activeSessionUser'));
-            
-            if (!activeUser || !activeUser.email) {
-                window.location.href = "auth.html";
-                return; 
+            // --- UPDATED SECURE SIGN OUT GATE EVENT ACTION HOOK ---
+            const signoutBtn = document.getElementById('appSignOutActionBtn');
+            if (signoutBtn) {
+                signoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.showCustomPopup) {
+                        window.showCustomPopup('Your developer session has been safely closed. Terminating terminal authentication layers...', 'danger', () => { 
+                            localStorage.removeItem('activeSessionUser'); 
+                            window.location.href = 'auth.html'; 
+                        });
+                    } else {
+                        localStorage.removeItem('activeSessionUser'); 
+                        window.location.href = 'auth.html';
+                    }
+                });
             }
-
-            if (!activeUser) activeUser = {};
 
             const SIX_DAYS_MS = 6 * 24 * 60 * 60 * 1000;
             

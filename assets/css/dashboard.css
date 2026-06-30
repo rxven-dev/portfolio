@@ -183,28 +183,45 @@ html.light-theme body {
 
 /* Workspace Canvas Layout Components */
 .main-content {
-    margin-left: 260px;
-    flex-grow: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+        flex: 1 !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        overflow-y: auto !important; 
+        padding: 140px 16px 24px 16px !important; /* Slightly adjusted buffer padding */
+        box-sizing: border-box !important;
+        -webkit-overflow-scrolling: touch !important;
+        
+        /* Force container layers to calculate beneath the top bar header grid */
+        position: relative !important;
+        z-index: 1 !important;
+    }
 
 .topbar {
-    height: 70px;
-    background-color: var(--bg-sidebar) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    position: sticky;
-    top: 0;
-    z-index: 90;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
+        position: fixed !important; 
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: auto !important;
+        min-height: 110px !important; 
+        padding: 14px 16px !important; 
+        margin-bottom: 0 !important; 
+        display: flex !important;
+        flex-direction: column !important; 
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        gap: 12px !important;
+        
+        /* --- HIGH LEVEL LAYER DEPTH SECURITY LOCK --- */
+        z-index: 99999 !important; /* Forces the header to sit entirely on top of the cards */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important; 
+
+        /* --- THE MAGIC iOS LIQUID GLASS EFFECT --- */
+        background: rgba(6, 9, 19, 0.72) !important; 
+        backdrop-filter: blur(20px) saturate(190%) !important; 
+        -webkit-backdrop-filter: blur(20px) saturate(190%) !important; 
+    }
 
 .search-bar {
     display: flex;
@@ -312,21 +329,18 @@ html.light-theme body {
     margin-bottom: 32px;
 }
 
-.metric-card, .data-table-section, .modal-content {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 24px !important; 
-    backdrop-filter: blur(24px) saturate(190%) !important; 
-    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-    padding: 24px;
-    color: var(--text-primary) !important;
-    /* Soft premium shadow for light mode surfaces */
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 
-                0 4px 12px -3px rgba(0, 0, 0, 0.03) !important;
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-                box-shadow 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-                background-color 0.3s ease, border-color 0.3s ease;
-}
+/* --- THE PHYSICAL PRESS ACTION STATE (WHEN FINGER TOUCHES DOWN) --- */
+    .metric-card:active, 
+    .data-table-section:active,
+    .game-cards-grid > div:active {
+        transform: scale(0.97) translateY(2px) !important; /* Slightly shrinks and sinks down */
+        background-color: rgba(31, 41, 55, 0.85) !important; 
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; 
+        
+        /* --- ELIMINATE THE BLUE/WHITE FLASH OUTLINE TAP BOXES --- */
+        outline: none !important;
+        -webkit-focus-ring-color: transparent !important;
+    }
 
 /* Rich neon-depth black shadow exclusively for dark mode canvas views */
 html.dark-theme .metric-card, 
@@ -1123,6 +1137,7 @@ html.dark-theme .game-display-card:hover {
 /* ==========================================================================
    UNIFIED RESPONSIVE NAVIGATION DRAWER & MOBILE LAYOUT FIXES
    ========================================================================== */
+
 @media (max-width: 768px) {
     html, body {
         height: 100% !important;
@@ -1158,7 +1173,7 @@ html.dark-theme .game-display-card:hover {
         border-radius: 8px !important;
     }
 
-/* --- SOLID APP DRAWER SLIDEOUT NAVIGATION OVERLAY --- */
+    /* --- SOLID APP DRAWER SLIDEOUT NAVIGATION OVERLAY --- */
     .sidebar {
         position: fixed !important;
         top: 0 !important;
@@ -1167,7 +1182,7 @@ html.dark-theme .game-display-card:hover {
         min-width: 260px !important;
         height: 100vh !important;
         z-index: 999999 !important;  
-        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important; /* Premium buttery smooth slide acceleration */
+        transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
         box-shadow: 15px 0 40px rgba(0, 0, 0, 0.4) !important;
         display: flex !important;
         flex-direction: column !important;
@@ -1175,39 +1190,32 @@ html.dark-theme .game-display-card:hover {
         padding: 24px 16px !important;
         box-sizing: border-box !important;
         overflow-x: hidden !important;
-
-        /* --- THE MATCHING iOS LIQUID GLASS EFFECTS --- */
-        background: rgba(15, 17, 26, 0.78) !important; /* Slightly darker glass tint to give the drawer separation depth */
-        backdrop-filter: blur(24px) saturate(190%) !important; /* High-density frosted glass melt filter */
+        background: rgba(15, 17, 26, 0.78) !important; 
+        backdrop-filter: blur(24px) saturate(190%) !important; 
         -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.06) !important; /* Clean hairline divider on the drawer edge */
+        border-right: 1px solid rgba(255, 255, 255, 0.06) !important; 
     }
 
     .sidebar.mobile-open {
         left: 0 !important;
     }
-    
-    .sidebar *, .sidebar a, .sidebar span {
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
-        overflow: hidden !important;
-        max-width: 100% !important;
-    }
 
-/* --- MAIN CONTENT ELEMENT WRAPPER --- */
+    /* --- MOBILE ONLY MAIN CONTENT LAYOUT --- */
     .main-content {
         flex: 1 !important;
         width: 100% !important;
         margin-left: 0 !important;
         overflow-y: auto !important; 
-        padding: 130px 16px 16px 16px !important; /* Large top padding to push cards below the floating header */
+        padding: 140px 16px 24px 16px !important; /* Large top padding ONLY on mobile */
         box-sizing: border-box !important;
         -webkit-overflow-scrolling: touch !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
-/* --- PREMIUM MOBILE TWO-ROW HEADER DESIGN --- */
+    /* --- PREMIUM MOBILE TWO-ROW FIXED HEADER DESIGN --- */
     .topbar {
-        position: fixed !important; /* Sticky/Fixed lock on the viewport window absolute coordinates */
+        position: fixed !important; /* Fixed ONLY on mobile screens */
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
@@ -1216,143 +1224,168 @@ html.dark-theme .game-display-card:hover {
         padding: 14px 16px !important; 
         margin-bottom: 0 !important; 
         display: flex !important;
-        flex-direction: column !important; 
+        flex-direction: column !important; /* Stack rows into layers ONLY on mobile */
         justify-content: flex-start !important;
         align-items: stretch !important;
         width: 100% !important;
         box-sizing: border-box !important;
         gap: 12px !important;
-        z-index: 9999 !important; 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important; /* Premium subtle divider line */
-
-        /* --- THE MAGIC iOS LIQUID GLASS EFFECT --- */
-        background: rgba(6, 9, 19, 0.72) !important; /* Translucent background dark coat tint */
-        backdrop-filter: blur(20px) saturate(190%) !important; /* Liquid glass blur + native iOS color saturation boost */
-        -webkit-backdrop-filter: blur(20px) saturate(190%) !important; /* Safari compatibility rendering support */
+        z-index: 99999 !important; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important; 
+        background: rgba(6, 9, 19, 0.72) !important; 
+        backdrop-filter: blur(20px) saturate(190%) !important; 
+        -webkit-backdrop-filter: blur(20px) saturate(190%) !important; 
     }
 
-    /* The Row 1 left container (Menu button + Search bar) */
-    .topbar > div:first-child {
+    .topbar-left-container {
         display: flex !important;
         align-items: center !important;
-        flex: 1 !important;
-        max-width: 100% !important;
         width: 100% !important;
     }
 
-    /* Premium Search Bar */
-    .search-bar {
-        flex: 1 !important;
-        width: 100% !important;
-        height: 38px !important;
-        padding: 0 12px !important;
-        margin: 0 !important;
-        background: rgba(17, 24, 39, 0.7) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 8px !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    .search-bar input {
-        font-size: 0.85rem !important;
-        width: 100% !important;
-        background: transparent !important;
-        border: none !important;
-        color: var(--text-primary) !important;
-        padding-left: 6px !important;
-    }
-
-    /* The Row 1/2 Right container (Holds dropdown, notification, and register button) */
     .topbar-actions {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
         width: 100% !important;
         gap: 10px !important; 
-        flex-wrap: wrap !important; /* Gracefully allows buttons to step down */
     }
 
-    /* Currency Dropdown: Spans nicely alongside notifications */
     .currency-dropdown-container {
         flex: 1 !important;
     }
 
-/* Currency conversion dropdown */
     #platformCurrencyConverter {
         width: 100% !important;
         padding: 0 12px !important;
-        font-size: 16px !important; /* Forces mobile safari/chrome engines to skip auto-zoom layouts */
+        font-size: 16px !important; 
         border-radius: 8px !important;
         height: 38px !important; 
         background: rgba(17, 24, 39, 0.7) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         color: var(--text-primary) !important;
-        transform: none !important; /* Clears focus engine shift rules */
-        outline: none !important;
-    }
-    
-    #platformCurrencyConverter:focus {
-        outline: none !important;
-        border-color: var(--accent-primary, #6366f1) !important;
     }
 
-    /* Notification button centering layout */
-    .action-icon-btn {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 0 !important;
-        font-size: 1.2rem !important;
-        height: 38px !important;
-        width: 38px !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        border-radius: 8px !important;
-        position: relative !important;
-    }
-
-    .action-icon-btn .badge {
-        position: absolute !important;
-        top: 8px !important;
-        right: 8px !important;
-        width: 8px !important;
-        height: 8px !important;
-        border-radius: 50% !important;
-        background: #ef4444 !important;
-    }
-
-    /* --- THE HERO HERO ACTION REGISTER BUTTON --- */
     button[id*="Register"],
     button[class*="register"],
     .btn-primary,
     #openRegisterGameModalBtn {
-        width: 100% !important; /* Full width button below the utilities */
-        padding: 0 16px !important;
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
+        width: 100% !important; 
         height: 40px !important; 
-        min-height: 40px !important;
-        white-space: nowrap !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
-        border-radius: 8px !important;
         margin-top: 4px !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2) !important;
     }
 
-    /* Ensure uniform dashboard content components stack correctly */
+    /* Stack grid items ONLY on mobile */
     .content-container div[style*="display: grid"], 
-    .content-container div[style*="grid-template-columns"] {
+    .content-container div[style*="grid-template-columns"],
+    .metrics-grid {
         display: grid !important;
         grid-template-columns: 1fr !important; 
         gap: 16px !important;
     }
+}
 
-    .custom-theme-input, 
-    select {
-        font-size: 16px !important;
+/* ==========================================================================
+   DESKTOP VIEW LAYER SAFETY ANCHOR
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* Keep desktop topbar strictly ABOVE hover animations */
+    .topbar {
+        position: relative;
+        z-index: 1000 !important;
+        background: var(--bg-main) !important;
+    }
+    .main-content {
+        position: relative;
+        z-index: 1;
     }
 }
+
+/* ==========================================================================
+   FORCE DESKTOP RESTORATION (CRITICAL OVERRIDE GATES)
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* 1. Force the dashboard container layout to be a side-by-side row split */
+    .dashboard-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    /* 2. Force the sidebar back to its normal desktop layout position */
+    .sidebar {
+        position: relative !important;
+        left: 0 !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        height: 100% !important;
+        transform: none !important;
+        box-shadow: none !important;
+        z-index: 10 !important;
+    }
+
+    /* 3. Pull main content window back into layout row alignment */
+    .main-content {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+        padding: 24px !important; /* Wipe out massive mobile top bar padding gaps */
+        margin-left: 0 !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    /* 4. Restore the Topbar Header back into a horizontal row grid */
+    .topbar {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        width: 100% !important;
+        min-height: 70px !important;
+        height: 70px !important;
+        display: flex !important;
+        flex-direction: row !important; /* Forces layout horizontal row map grid back */
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 0 20px 0 !important;
+        background: transparent !important; /* Disables sticky mobile glass overlay shading properties */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        gap: 0 !important;
+        z-index: 5 !important;
+    }
+
+    /* 5. Force specific elements inside header back into standard desktop widths */
+    .topbar-left-container,
+    .topbar-actions {
+        width: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 16px !important;
+    }
+
+    #platformCurrencyConverter {
+        width: 130px !important; /* Return select box back to compact container parameters */
+    }
+
+    /* 6. Restore Multi-Column System Grid Patterns */
+    .metrics-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; /* Re-enable responsive desktop multi-columns */
+        gap: 24px !important;
+    }
+
+    .content-container div[style*="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr))"] {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important; /* Fix account profile layout splits */
+        gap: 24px !important;
+    }
+}
+
